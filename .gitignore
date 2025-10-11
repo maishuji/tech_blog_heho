@@ -1,7 +1,50 @@
+# Virtual Environment
 venv
+env
+
+# Environment Files (contain secrets - never commit these)
 .env
+.env.*
+!.env.*.example
+!.env.example
+
+# Django
 blog_heho/media
 blog_heho/db.sqlite3
+blog_heho/staticfiles
+
+# Database
 **/migrations/*
+*.sqlite3
+
+# Security
 .private/*
+*.pem
+*.key
+
+# Python
 __pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+.coverage
+.pytest_cache
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
