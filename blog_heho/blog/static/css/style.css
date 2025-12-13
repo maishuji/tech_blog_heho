@@ -1,102 +1,260 @@
+/* Modern Beautiful Blog Styles */
+
 .markdown-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.8;
     max-width: 100%;
     word-wrap: break-word;
+    color: #2d3748;
 }
 
 .markdown-body pre {
-    background-color: #f6f8fa;
-    padding: 10px;
-    border-radius: 5px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    border-radius: 12px;
     overflow-x: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.markdown-body pre code {
+    background: transparent;
+    color: #fff;
+    padding: 0;
 }
 
 .markdown-body code {
-    font-family: monospace;
-    background-color: #f6f8fa;
-    padding: 2px 5px;
-    border-radius: 4px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: #667eea;
+    font-weight: 500;
 }
 
 .markdown-body h1 {
-    font-size: 2rem;
-    font-weight: bold;
-    color: black;
-    margin-top: 20px;
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 30px;
+    margin-bottom: 15px;
 }
 
 .markdown-body h2 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: black;
-    margin-top: 15px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-top: 25px;
+    margin-bottom: 12px;
+    border-left: 5px solid #667eea;
+    padding-left: 15px;
 }
 
 .markdown-body h3 {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: black;
-    margin-top: 10px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.markdown-body p {
+    margin-bottom: 1.2em;
+}
+
+.markdown-body a {
+    color: #667eea;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+.markdown-body a:hover {
+    border-bottom-color: #667eea;
+}
+
+.markdown-body ul, .markdown-body ol {
+    margin-left: 1.5em;
+    margin-bottom: 1.2em;
+}
+
+.markdown-body li {
+    margin-bottom: 0.5em;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #667eea;
+    padding-left: 20px;
+    margin: 20px 0;
+    font-style: italic;
+    color: #4a5568;
+    background: linear-gradient(to right, #667eea08, transparent);
+    padding: 15px 20px;
+    border-radius: 0 8px 8px 0;
 }
 
 .pagination {
-    margin-top: 20px;
+    margin-top: 40px;
     text-align: center;
 }
 
 .pagination a {
     text-decoration: none;
-    padding: 8px 12px;
-    margin: 5px;
-    border: 1px solid #333;
-    border-radius: 5px;
-    color: blue;
-    background-color: #f4f4f4;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .pagination a:hover {
-    background-color: #ddd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .pagination span {
-    padding: 8px 12px;
-    font-weight: bold;
+    padding: 10px 20px;
+    font-weight: 600;
+    color: #4a5568;
 }
 
 .tag {
     display: inline-block;
-    background-color: #f0f0f0; /* Light gray background */
-    color: #333; /* Dark text */
-    padding: 5px 10px;
-    margin: 3px;
-    border-radius: 15px; /* Rounded corners */
-    font-size: 14px;
-    font-weight: bold;
-    /*text-transform: uppercase;*/
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 6px 16px;
+    margin: 5px 5px 5px 0;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
 .comment {
-    border-left: 3px solid #007bff;
-    margin: 10px 0;
-    padding: 10px;
-    background: #f8f9fa;
-    border-radius: 5px;
+    border-left: 4px solid #667eea;
+    margin: 20px 0;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
 }
 
-body{
+.comment:hover {
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    transform: translateX(5px);
+}
+
+body {
+    background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);
     background-image: url("/static/images/bg_pattern1.png");
-    background-repeat: repeat;  /* This makes the image repeat */
-    background-position: top left; /* Optional: controls where the image starts */
-    background-size: auto;  /* Optional: controls the size of the image */
+    background-repeat: repeat;
+    background-position: top left;
+    background-size: auto;
+}
+
+/* Card Styles */
+.blog-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+}
+
+.post-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Form Styles */
+input[type="text"],
+input[type="email"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Button Styles */
+button[type="submit"],
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 32px;
+    border-radius: 25px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+button[type="submit"]:hover,
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 /* Not used for now */
 .bg-menu { 
     background-image: url("/static/images/bg_menu_pattern1.png");
-    background-repeat: repeat;  /* This makes the image repeat */
-    background-position: top left; /* Optional: controls where the image starts */
-    background-size: auto;  /* Optional: controls the size of the image */
+    background-repeat: repeat;
+    background-position: top left;
+    background-size: auto;
     border-radius: 10px;
     padding: 5px;
 }
