@@ -33,17 +33,17 @@ lint:
 	pylint blog_heho/blog
 
 startdocker: 
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 stopdocker:
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml down
 
 # Raspberry Pi targets (local operations)
 startpi:
-	docker-compose -f docker-compose.yml -f docker-compose.pi.yml up -d
+	docker compose -f docker-compose.yml -f docker-compose.pi.yml up -d
 
 stoppi:
-	docker-compose -f docker-compose.yml -f docker-compose.pi.yml down
+	docker compose -f docker-compose.yml -f docker-compose.pi.yml down
 
 buildpi:
 	@echo "🏗️ Building ARM64 image for Raspberry Pi..."
@@ -52,10 +52,10 @@ buildpi:
 
 testpi-local: buildpi
 	@echo "🧪 Testing Pi deployment locally..."
-	docker-compose -f docker-compose.yml -f docker-compose.pi.yml up -d
+	docker compose -f docker-compose.yml -f docker-compose.pi.yml up -d
 	sleep 30
 	curl -f http://localhost/health/ && echo "✅ Pi deployment healthy" || echo "❌ Health check failed"
-	docker-compose -f docker-compose.yml -f docker-compose.pi.yml down
+	docker compose -f docker-compose.yml -f docker-compose.pi.yml down
 
 # Raspberry Pi deployment targets (deploy from computer to Pi)
 check-pi-config:
@@ -82,13 +82,17 @@ backup-pi: check-pi-config
 		if [ -f docker-compose.yml ]; then \
 			BACKUP_NAME="backup-$(shell date +%Y%m%d-%H%M%S)" && \
 			mkdir -p backups/$$BACKUP_NAME && \
-			docker-compose -f docker-compose.yml -f docker-compose.pi.yml down && \
+			docker compose -f docker-compose.yml -f docker-compose.pi.yml down && \
 			cp -r * backups/$$BACKUP_NAME/ 2>/dev/null || true && \
 			echo "✅ Backup created: $$BACKUP_NAME"; \
 		else \
 			echo "ℹ️ No existing deployment to backup (first-time deployment)"; \
 		fi'
 
+# Deploy source files and configurations to Pi
+# This uploads Django code, templates, docker compose configs, nginx config, and environment files
+# Use this when: You've made code changes, updated configs, or changed environment variables
+# Fast: Only transfers text files, no Docker image rebuild required
 deploy-files: check-pi-config prepare-pi
 	@echo "📤 Uploading files to Raspberry Pi..."
 	scp -r -i "$(PI_SSH_KEY_PATH)" \
@@ -117,22 +121,22 @@ deploy-start: check-pi-config
 	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
 		echo "🛑 Stopping existing services..." && \
-		docker-compose -f docker-compose.yml -f docker-compose.pi.yml down --remove-orphans || true && \
+		docker compose -f docker-compose.yml -f docker-compose.pi.yml down --remove-orphans || true && \
 		echo "� Setting up environment..." && \
 		cp .env.pi.deploy .env || echo "No .env.pi.deploy found, using defaults" && \
 		echo "🚀 Starting new deployment..." && \
-		docker-compose -f docker-compose.yml -f docker-compose.pi.yml --env-file .env up -d && \
+		docker compose -f docker-compose.yml -f docker-compose.pi.yml --env-file .env up -d && \
 		echo "⏳ Waiting for services to start..." && \
 		sleep 30 && \
 		echo "📊 Service status:" && \
-		docker-compose -f docker-compose.yml -f docker-compose.pi.yml ps'
+		docker compose -f docker-compose.yml -f docker-compose.pi.yml ps'
 
 deploypi: backup-pi deploy-files deploy-image deploy-start
 	@echo "🎉 Full deployment completed!"
 	@echo "🔗 Access your app at: http://$(PI_HOST)"
 	@ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
-		NGINX_PORT=$$(docker-compose port nginx 80 | cut -d: -f2) && \
+		NGINX_PORT=$$(docker compose port nginx 80 | cut -d: -f2) && \
 		echo "🌐 Full URL: http://$(PI_HOST):$$NGINX_PORT"'
 
 # Quick deploy (skip backup for faster deployment)
@@ -148,7 +152,7 @@ healthpi: check-pi-config
 	@echo "🏥 Checking Pi deployment health..."
 	@ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
-		if docker-compose --env-file .env ps | grep -q "Up"; then \
+		if docker compose --env-file .env ps | grep -q "Up"; then \
 			echo "✅ Services are running" && \
 			if curl -f http://localhost/health/ >/dev/null 2>&1; then \
 				echo "✅ Health check passed - Application is healthy"; \
@@ -166,7 +170,7 @@ stoppi-remote: check-pi-config
 	@echo "🛑 Stopping Pi deployment..."
 	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
-		docker-compose -f docker-compose.yml -f docker-compose.pi.yml down && \
+		docker compose -f docker-compose.yml -f docker-compose.pi.yml down && \
 		echo "✅ Services stopped"'
 
 # View Pi logs
@@ -174,7 +178,7 @@ logspi: check-pi-config
 	@echo "📋 Fetching Pi deployment logs..."
 	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
-		docker-compose -f docker-compose.yml -f docker-compose.pi.yml logs --tail=50'
+		docker compose -f docker-compose.yml -f docker-compose.pi.yml logs --tail=50'
 
 # Monitor Pi resources
 monitorpi: check-pi-config
@@ -187,7 +191,7 @@ monitorpi: check-pi-config
 		echo "Docker Usage:" && docker system df && \
 		echo "" && \
 		echo "Running Containers:" && \
-		cd ~/blog-deploy && docker-compose ps'
+		cd ~/blog-deploy && docker compose ps'
 
 ssh:
 	ssh -i "$(SSH_KEY_PATH)" $(EC2_USER)@$(EC2_IP)
