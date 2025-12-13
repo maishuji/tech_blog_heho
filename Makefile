@@ -2,13 +2,26 @@ SSH_KEY_PATH = .private/ssh_access.pem
 EC2_USER = "ubuntu"
 EC2_IP ?= $(EC2_SERVER_IP)
 
+# Environment Configuration
+# Load .env file if it exists (for local development and Pi connection settings)
+ifneq (,$(wildcard .env))
+    include .env
+    export
+endif
+
 # Raspberry Pi Configuration
-# Load from .env.pi if it exists
+# Load from .env.pi if it exists (alternative Pi-specific config)
 ifneq (,$(wildcard .env.pi))
     include .env.pi
     export
 endif
 
+# Strip whitespace from environment variables to avoid issues
+PI_SSH_KEY_PATH := $(strip $(PI_SSH_KEY_PATH))
+PI_USER := $(strip $(PI_USER))
+PI_HOST := $(strip $(PI_HOST))
+
+# Set defaults if not provided
 PI_SSH_KEY_PATH ?= .private/pi_ssh.pem
 PI_USER ?= pi
 PI_HOST ?= $(PI_SERVER_IP)
@@ -178,6 +191,9 @@ monitorpi: check-pi-config
 
 ssh:
 	ssh -i "$(SSH_KEY_PATH)" $(EC2_USER)@$(EC2_IP)
+
+sshpi:
+	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST)
 
 sshpi:
 	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST)
