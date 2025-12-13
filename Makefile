@@ -61,7 +61,8 @@ testpi-local: buildpi
 check-pi-config:
 	@echo "🔍 Checking Pi configuration..."
 	@if [ -z "$(PI_HOST)" ]; then echo "❌ PI_HOST not set. Use: make deploypi PI_HOST=your-pi-ip"; exit 1; fi
-	@if [ ! -f "$(PI_SSH_KEY_PATH)" ]; then echo "❌ SSH key not found at $(PI_SSH_KEY_PATH)"; exit 1; fi
+	@SSH_KEY_EXPANDED=$$(echo "$(PI_SSH_KEY_PATH)" | sed "s|^~|$$HOME|"); \
+	if [ ! -f "$$SSH_KEY_EXPANDED" ]; then echo "❌ SSH key not found at $$SSH_KEY_EXPANDED"; exit 1; fi
 	@echo "✅ Configuration OK"
 	@echo "   Host: $(PI_HOST)"
 	@echo "   User: $(PI_USER)"
@@ -82,7 +83,7 @@ backup-pi: check-pi-config
 		if [ -f docker-compose.yml ]; then \
 			BACKUP_NAME="backup-$(shell date +%Y%m%d-%H%M%S)" && \
 			mkdir -p backups/$$BACKUP_NAME && \
-			docker compose -f docker-compose.yml -f docker-compose.pi.yml down && \
+			docker-compose -f docker-compose.yml -f docker-compose.pi.yml down && \
 			cp -r * backups/$$BACKUP_NAME/ 2>/dev/null || true && \
 			echo "✅ Backup created: $$BACKUP_NAME"; \
 		else \
@@ -121,15 +122,15 @@ deploy-start: check-pi-config
 	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
 		echo "🛑 Stopping existing services..." && \
-		docker compose -f docker-compose.yml -f docker-compose.pi.yml down --remove-orphans || true && \
+		docker-compose -f docker-compose.yml -f docker-compose.pi.yml down --remove-orphans || true && \
 		echo "� Setting up environment..." && \
 		cp .env.pi.deploy .env || echo "No .env.pi.deploy found, using defaults" && \
 		echo "🚀 Starting new deployment..." && \
-		docker compose -f docker-compose.yml -f docker-compose.pi.yml --env-file .env up -d && \
+		docker-compose -f docker-compose.yml -f docker-compose.pi.yml --env-file .env up -d && \
 		echo "⏳ Waiting for services to start..." && \
 		sleep 30 && \
 		echo "📊 Service status:" && \
-		docker compose -f docker-compose.yml -f docker-compose.pi.yml ps'
+		docker-compose -f docker-compose.yml -f docker-compose.pi.yml ps'
 
 deploypi: backup-pi deploy-files deploy-image deploy-start
 	@echo "🎉 Full deployment completed!"
@@ -170,7 +171,7 @@ stoppi-remote: check-pi-config
 	@echo "🛑 Stopping Pi deployment..."
 	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
-		docker compose -f docker-compose.yml -f docker-compose.pi.yml down && \
+		docker-compose -f docker-compose.yml -f docker-compose.pi.yml down && \
 		echo "✅ Services stopped"'
 
 # View Pi logs
@@ -178,7 +179,7 @@ logspi: check-pi-config
 	@echo "📋 Fetching Pi deployment logs..."
 	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
 		cd ~/blog-deploy && \
-		docker compose -f docker-compose.yml -f docker-compose.pi.yml logs --tail=50'
+		docker-compose -f docker-compose.yml -f docker-compose.pi.yml logs --tail=50'
 
 # Monitor Pi resources
 monitorpi: check-pi-config
