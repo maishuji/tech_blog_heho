@@ -30,45 +30,58 @@
     </script>
 
     <!-- Header -->    
-    <header class="bg-blue-600 text-white p-4 shadow-md">
+    <header class="text-white p-4 shadow-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
         <div class="container mx-auto flex justify-between items-center">
                 <!-- Logo and Title -->
             <div class="flex items-center space-x-3">
-                <img src="/static/images/logo1.png" alt="(Logo)" class="h-20 w-20 object-contain rounded">
-                <h1 class="text-xl font-bold">Mofafen Blog</h1>
+                <img src="/static/images/logo1.png" alt="(Logo)" class="h-20 w-20 object-contain rounded-full shadow-lg border-4 border-white">
+                <h1 class="text-2xl font-bold tracking-tight">Mofafen Blog</h1>
             </div>
 
             <!-- Mobile Menu Button (Hamburger) -->
-            <div class="md:hidden p-2 bg-blue-600 text-white flex justify-start">
-                <button id="menu-toggle" class="text-xl font-bold bg-blue-500 px-4 py-2 rounded-lg hover:bg-blue-400" onclick="toggleMenu()">☰ Menu</button>
+            <div class="md:hidden p-2 text-white flex justify-start">
+                <button id="menu-toggle" class="text-xl font-bold bg-white bg-opacity-20 px-4 py-2 rounded-lg hover:bg-opacity-30 backdrop-blur-sm transition" onclick="toggleMenu()">☰ Menu</button>
             </div>
         </div>
 
         <!-- Mobile Menu (Initially Hidden) -->
-        <div id="mobile-menu" class="bg-blue-700 md:hidden hidden text-white p-6">
+        <div id="mobile-menu" class="md:hidden hidden text-white p-6 bg-white bg-opacity-10 backdrop-blur-lg rounded-b-lg mt-4">
             <nav class="flex flex-col space-y-2">
-                <a href="/home" class="block py-2 px-3 rounded-lg hover:bg-blue-500">Home</a>
-                <a href="/articles" class="block py-2 px-3 rounded-lg hover:bg-blue-500">Articles</a>
-                <a href="/about" class="block py-2 px-3 rounded-lg hover:bg-blue-500">About</a>
-                <a href="/contact" class="block py-2 px-3 rounded-lg hover:bg-blue-500">Contact</a>
+                <a href="/home" class="block py-2 px-3 rounded-lg hover:bg-white hover:bg-opacity-20 transition">🏠 Home</a>
+                <a href="/articles" class="block py-2 px-3 rounded-lg hover:bg-white hover:bg-opacity-20 transition">📝 Articles</a>
+                <a href="/about" class="block py-2 px-3 rounded-lg hover:bg-white hover:bg-opacity-20 transition">👤 About</a>
+                <a href="/contact" class="block py-2 px-3 rounded-lg hover:bg-white hover:bg-opacity-20 transition">✉️ Contact</a>
             </nav>
         </div>
     </header>
 
     <div class="flex min-h-screen">
         <!-- Sidebar (Visible Only on Desktop) -->
-        <aside id="sidebar-menu" class="bg-blue-700 w-full md:w-64 text-white p-6 hidden md:flex flex-col">
-            <h2 class="text-2xl font-bold">Menu</h2>
-            <nav class="mt-4 space-y-2">
-                <a href="/home" class="block py-2 px-3 rounded-lg hover:bg-blue-500">Home</a>
-                <a href="/articles" class="block py-2 px-3 rounded-lg hover:bg-blue-500">Articles</a>
-                <a href="/about" class="block py-2 px-3 rounded-lg hover:bg-blue-500">About</a>
-                <a href="/contact" class="block py-2 px-3 rounded-lg hover:bg-blue-500">Contact</a>
+        <aside id="sidebar-menu" class="w-full md:w-64 text-white p-6 hidden md:flex flex-col" style="background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);">
+            <h2 class="text-2xl font-bold mb-2">Navigation</h2>
+            <div class="h-1 w-16 bg-white rounded-full mb-6"></div>
+            <nav class="mt-4 space-y-3">
+                <a href="/home" class="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-white hover:bg-opacity-20 transition backdrop-blur-sm">
+                    <span class="text-xl">🏠</span>
+                    <span class="font-medium">Home</span>
+                </a>
+                <a href="/articles" class="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-white hover:bg-opacity-20 transition backdrop-blur-sm">
+                    <span class="text-xl">📝</span>
+                    <span class="font-medium">Articles</span>
+                </a>
+                <a href="/about" class="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-white hover:bg-opacity-20 transition backdrop-blur-sm">
+                    <span class="text-xl">👤</span>
+                    <span class="font-medium">About</span>
+                </a>
+                <a href="/contact" class="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-white hover:bg-opacity-20 transition backdrop-blur-sm">
+                    <span class="text-xl">✉️</span>
+                    <span class="font-medium">Contact</span>
+                </a>
             </nav>
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 p-6">
+        <div class="flex-1 p-6 md:p-10">
             {% block content %}{% endblock %}
         </div>
     </div>

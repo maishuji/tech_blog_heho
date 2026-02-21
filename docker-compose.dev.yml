@@ -1,4 +1,3 @@
-version: '3.8'
 
 services:
   django:
@@ -9,9 +8,11 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=blog_heho.settings.development
       - DJANGO_DEBUG=True
+      - DJANGO_SECRET_KEY=dev-secret-key-change-in-production-only
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
     volumes:
       - .:/app  # Mount the code folder for live editing
-    command: bash -c "ls && ./wait-for-it.sh tech_blog_heho_postgres_1:5432 && python blog_heho/manage.py runserver 0.0.0.0:8000"
+    command: bash -c "ls && ./wait-for-it.sh postgres:5432 && python blog_heho/manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
 

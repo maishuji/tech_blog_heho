@@ -13,6 +13,7 @@ services:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
       - DJANGO_TRUSTED_ORIGINS=${DJANGO_TRUSTED_ORIGINS}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
       - DB_HOST=postgres
       - DB_NAME=${DB_NAME:-testdb}
       - DB_USER=${DB_USER:-testuser}
@@ -70,8 +71,8 @@ services:
   nginx:
     image: nginx:alpine
     ports:
-      - "80:80"
-      - "443:443"
+      - "8080:80"
+      - "8443:443"
     volumes:
       - ./nginx.pi.conf:/etc/nginx/nginx.conf:ro
       - pi_static:/var/www/static:ro
