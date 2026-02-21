@@ -226,6 +226,29 @@ monitorpi: check-pi-config
 		echo "Running Containers:" && \
 		cd ~/blog-deploy && docker compose ps'
 
+## Blog Content Management Targets ##
+
+# Import articles from GitHub repository to Pi
+import-articles-pi: check-pi-config
+	@echo "📚 Importing articles from GitHub repository..."
+	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
+		cd ~/blog-deploy && \
+		docker exec blog_pi-django-1 python blog_heho/manage.py import_articles'
+
+# Import articles with update flag (overwrites existing)
+import-articles-pi-update: check-pi-config
+	@echo "📚 Importing/updating articles from GitHub repository..."
+	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
+		cd ~/blog-deploy && \
+		docker exec blog_pi-django-1 python blog_heho/manage.py import_articles --update'
+
+# Create Django superuser on Pi
+createsuper-pi: check-pi-config
+	@echo "👤 Creating Django superuser on Pi..."
+	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
+		cd ~/blog-deploy && \
+		docker exec -it blog_pi-django-1 python blog_heho/manage.py createsuperuser'
+
 ## SSH Access Targets ##
 
 # SSH into EC2 server
