@@ -1,6 +1,8 @@
 '''
 Django management command to import blog articles from GitHub repository
 '''
+import json
+import os
 import re
 from urllib import request
 from urllib.error import URLError
@@ -48,54 +50,61 @@ class Command(BaseCommand):
         self.stdout.write(self.style.NOTICE(f'Fetching articles from {repo}...'))
 
         try:
-            # Create request with authentication if token provided
-            req = request.Request(api_url)
-            if token:
-                req.add_header('Authorization', f'token {token}')
-                self.stdout.write(self.style.NOTICE('Using GitHub authentication'))
-
-            # Fetch repository contents
-            with request.urlopen(req) as response:
-                if response.status != 200:
-                    self.stdout.write(
-                        self.style.ERROR(f'Failed to fetch repository: HTTP {response.status}')
-                    )
-                    return
-
-                import json
-                files = json.loads(response.read().decode())
-
-            imported_count = 0
-            updated_count = 0
-            skipped_count = 0
-
-            for file_info in files:
-                if file_info['name'].endswith('.md'):
-                    result = self.import_article(file_info, update_existing)
-                    if result == 'created':
-                        imported_count += 1
-                    elif result == 'updated':
-                        updated_count += 1
-                    else:
-                        skipped_count += 1
-
-            self.stdout.write(self.style.SUCCESS(
-                f'\n✅ Import complete!\n'
-                f'   Created: {imported_count}\n'
-                f'   Updated: {updated_count}\n'
-                f'   Skipped: {skipped_count}'
-            ))
+            files = self.fetch_repository_files(api_url, token)
+            stats = self.process_articles(files, update_existing)
+            self.print_import_summary(stats)
 
         except URLError as e:
             self.stdout.write(self.style.ERROR(f'Network error: {str(e)}'))
-        except Exception as e:
+        except (ValueError, KeyError) as e:
             self.stdout.write(self.style.ERROR(f'Error: {str(e)}'))
+
+    def fetch_repository_files(self, api_url, token):
+        '''
+        Fetch files from GitHub repository API
+        '''
+        req = request.Request(api_url)
+        if token:
+            req.add_header('Authorization', f'token {token}')
+            self.stdout.write(self.style.NOTICE('Using GitHub authentication'))
+
+        with request.urlopen(req) as response:
+            if response.status != 200:
+                self.stdout.write(
+                    self.style.ERROR(f'Failed to fetch repository: HTTP {response.status}')
+                )
+                return []
+            return json.loads(response.read().decode())
+
+    def process_articles(self, files, update_existing):
+        '''
+        Process all markdown files and return import statistics
+        '''
+        stats = {'created': 0, 'updated': 0, 'skipped': 0}
+
+        for file_info in files:
+            if file_info['name'].endswith('.md'):
+                result = self.import_article(file_info, update_existing)
+                if result in stats:
+                    stats[result] += 1
+
+        return stats
+
+    def print_import_summary(self, stats):
+        '''
+        Print import summary statistics
+        '''
+        self.stdout.write(self.style.SUCCESS(
+            f'\n✅ Import complete!\n'
+            f'   Created: {stats["created"]}\n'
+            f'   Updated: {stats["updated"]}\n'
+            f'   Skipped: {stats["skipped"]}'
+        ))
 
     def get_token_from_env(self):
         '''
         Get GitHub token from environment variable
         '''
-        import os
         return os.environ.get('GITHUB_TOKEN')
 
     def import_article(self, file_info, update_existing):
@@ -105,13 +114,13 @@ class Command(BaseCommand):
         try:
             # Download markdown content
             download_url = file_info['download_url']
-            
+
             # Create request with authentication if needed
             token = self.get_token_from_env()
             req = request.Request(download_url)
             if token:
                 req.add_header('Authorization', f'token {token}')
-            
+
             with request.urlopen(req) as response:
                 content = response.read().decode('utf-8')
 
@@ -128,7 +137,7 @@ class Command(BaseCommand):
                 if update_existing:
                     existing_post.content = content
                     existing_post.save()
-                    
+
                     # Clear old tags and add new ones from content
                     existing_post.tags.clear()
                     tags = self.extract_tags(content)
@@ -170,7 +179,7 @@ class Command(BaseCommand):
                 )
             return 'created'
 
-        except Exception as e:
+        except (URLError, KeyError, ValueError) as e:
             self.stdout.write(
                 self.style.ERROR(f'Error importing {file_info["name"]}: {str(e)}')
             )
@@ -203,16 +212,17 @@ class Command(BaseCommand):
         Converts to lowercase and replaces spaces with hyphens in multi-word tags
         '''
         # Look for HTML comment with tags or keywords
-        match = re.search(r'<!--\s*(?:tags|keywords)\s*:\s*(.+?)\s*-->', content, re.IGNORECASE | re.DOTALL)
-        
+        pattern = r'<!--\s*(?:tags|keywords)\s*:\s*(.+?)\s*-->'
+        match = re.search(pattern, content, re.IGNORECASE | re.DOTALL)
+
         if not match:
             return []
-        
+
         tags_line = match.group(1).strip()
-        
+
         # Split by comma and clean up
         raw_tags = [tag.strip() for tag in tags_line.split(',')]
-        
+
         # Process each tag: lowercase and replace spaces with hyphens
         processed_tags = []
         for tag in raw_tags:
@@ -220,5 +230,4 @@ class Command(BaseCommand):
                 # Convert to lowercase and replace spaces with hyphens
                 processed_tag = tag.lower().replace(' ', '-')
                 processed_tags.append(processed_tag)
-        
         return processed_tags
