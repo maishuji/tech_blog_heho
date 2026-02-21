@@ -5,6 +5,7 @@ import markdown
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import send_mail
+from django.db.models import Count
 from .models import BlogPost, Tag
 from .forms import ContactForm, CommentForm
 
@@ -12,8 +13,8 @@ def blog_list(request):
     '''
     List the blog posts
     '''
-    # Tag list
-    tags = Tag.objects.all()
+    # Tag list with article counts
+    tags = Tag.objects.annotate(article_count=Count('posts')).order_by('-article_count', 'name')
     posts = BlogPost.objects.all()
     selected_category = request.GET.get('category')
     if selected_category:
@@ -85,11 +86,7 @@ def home_view(request):
     Show the home page
     '''
     posts = BlogPost.objects.order_by('-id')[:5]  # Fetch the latest 5 blog posts
-
-    # Convert each post's content from Markdown to HTML
-    for post in posts:
-        post.title = markdown.markdown(post.title, extensions=["extra", "fenced_code", "toc"])
-        post.content = markdown.markdown(post.content, extensions=["extra", "fenced_code", "toc"])
+    # Keep raw content for previews - template will handle display
     return render(request, "home.html", {"posts": posts})
 
 def about_view(request):

@@ -128,9 +128,21 @@ class Command(BaseCommand):
                 if update_existing:
                     existing_post.content = content
                     existing_post.save()
-                    self.stdout.write(
-                        self.style.WARNING(f'Updated: {title}')
-                    )
+                    
+                    # Clear old tags and add new ones from content
+                    existing_post.tags.clear()
+                    tags = self.extract_tags(content)
+                    if tags:
+                        for tag_name in tags:
+                            tag, _ = Tag.objects.get_or_create(name=tag_name)
+                            existing_post.tags.add(tag)
+                        self.stdout.write(
+                            self.style.WARNING(f'Updated: {title} (tags: {", ".join(tags)})')
+                        )
+                    else:
+                        self.stdout.write(
+                            self.style.WARNING(f'Updated: {title} (no tags found)')
+                        )
                     return 'updated'
                 self.stdout.write(
                     self.style.NOTICE(f'Skipped (exists): {title}')
@@ -143,15 +155,19 @@ class Command(BaseCommand):
                 content=content
             )
 
-            # Extract and create tags from filename
-            tags = self.extract_tags(file_info['name'])
-            for tag_name in tags:
-                tag, _ = Tag.objects.get_or_create(name=tag_name)
-                post.tags.add(tag)
-
-            self.stdout.write(
-                self.style.SUCCESS(f'Created: {title}')
-            )
+            # Extract and create tags from article content
+            tags = self.extract_tags(content)
+            if tags:
+                for tag_name in tags:
+                    tag, _ = Tag.objects.get_or_create(name=tag_name)
+                    post.tags.add(tag)
+                self.stdout.write(
+                    self.style.SUCCESS(f'Created: {title} (tags: {", ".join(tags)})')
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS(f'Created: {title} (no tags found)')
+                )
             return 'created'
 
         except Exception as e:
@@ -180,18 +196,29 @@ class Command(BaseCommand):
         # Remove first # heading line
         return re.sub(r'^#\s+.+$\n?', '', content, count=1, flags=re.MULTILINE)
 
-    def extract_tags(self, filename):
+    def extract_tags(self, content):
         '''
-        Extract tags from filename (split by dash/underscore)
+        Extract tags from article content using HTML comment format
+        Example: <!--tags: cpp, design, best practices -->
+        Converts to lowercase and replaces spaces with hyphens in multi-word tags
         '''
-        # Remove .md extension and split by - or _
-        base_name = filename.replace('.md', '')
-        tags = re.split(r'[-_]', base_name)
-
-        # Filter out common words and clean
-        common_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for'}
-        return [
-            tag.strip().lower()
-            for tag in tags
-            if tag.strip().lower() not in common_words and len(tag.strip()) > 2
-        ]
+        # Look for HTML comment with tags or keywords
+        match = re.search(r'<!--\s*(?:tags|keywords)\s*:\s*(.+?)\s*-->', content, re.IGNORECASE | re.DOTALL)
+        
+        if not match:
+            return []
+        
+        tags_line = match.group(1).strip()
+        
+        # Split by comma and clean up
+        raw_tags = [tag.strip() for tag in tags_line.split(',')]
+        
+        # Process each tag: lowercase and replace spaces with hyphens
+        processed_tags = []
+        for tag in raw_tags:
+            if tag:
+                # Convert to lowercase and replace spaces with hyphens
+                processed_tag = tag.lower().replace(' ', '-')
+                processed_tags.append(processed_tag)
+        
+        return processed_tags

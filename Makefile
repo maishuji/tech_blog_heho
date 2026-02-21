@@ -174,6 +174,16 @@ deploypi-quick: deploy-files deploy-image deploy-start
 deploypi-code: deploy-files deploy-start
 	@echo "📝 Code deployment completed!"
 
+# Rebuild Docker containers on Pi from existing images (use when Python/Django changes need container restart)
+# Rebuilds containers without rebuilding the image - faster than full redeploy
+rebuildpi: check-pi-config
+	@echo "🔨 Rebuilding containers on Raspberry Pi..."
+	ssh -i "$(PI_SSH_KEY_PATH)" $(PI_USER)@$(PI_HOST) '\
+		cd ~/blog-deploy && \
+		docker compose -f docker-compose.yml -f docker-compose.pi.yml down && \
+		docker compose -f docker-compose.yml -f docker-compose.pi.yml up -d --build'
+	@echo "✅ Containers rebuilt successfully!"
+
 ## Raspberry Pi Management Targets ##
 
 # Check if Pi deployment is running and healthy
